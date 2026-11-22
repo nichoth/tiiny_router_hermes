@@ -29,6 +29,8 @@ a model, provider, and reasoning settings for each subtask.
   * [2. Configure](#2-configure)
   * [3. Check](#3-check)
   * [4. Restart](#4-restart)
+- [Use with `redeye`](#use-with-redeye)
+  * [`redeye` with Claude as orchestrator](#redeye-with-claude-as-orchestrator)
 - [What is the Hermes harness?](#what-is-the-hermes-harness)
 - [Request flow](#request-flow)
 - [When Tiiny routing applies](#when-tiiny-routing-applies)

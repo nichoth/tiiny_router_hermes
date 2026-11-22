@@ -1,6 +1,6 @@
 {
   "name": "hermes-tiiny-router",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Install Tiiny model routing into the Hermes agent harness",
   "type": "module",
   "main": "index.js",

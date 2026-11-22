@@ -1,7 +1,7 @@
 ---
 name: tiiny-model-routing
 description: "Run delegated sub-agents on the Tiiny device. Chooses the model that fits each subtask, loads it, locks the device against other agents, supervises the child, verifies its work, and releases the device."
-version: 2.1.1
+version: 2.1.2
 author: Gary Garcia (garciacionet-alt), Hermes Agent
 license: MIT
 platforms: [linux, macos]
