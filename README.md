@@ -1,10 +1,12 @@
 # tiiny-router-hermes
 
-Tiiny model routing for the Hermes harness.
+Tiiny model routing for the Hermes harness, a fork of
+[garciacionet-alt/AI_Articles](https://github.com/garciacionet-alt/AI_Articles/tree/main/tiiny-model-routing).
 
-This package chooses which model does each job.
-Each specialist model gets the task's goal and context without
-inheriting the manager's full conversation history.
+This package is a plugin for the
+[Hermes harness](https://hermes-agent.nousresearch.com/).
+It chooses which model does each job. Each specialist model gets the task's goal
+and context without inheriting the manager's full conversation history.
 See
 [Hermes delegation](https://hermes-agent.nousresearch.com/docs/user-guide/features/delegation).
 
