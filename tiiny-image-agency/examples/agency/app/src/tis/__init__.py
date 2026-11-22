@@ -1,1 +1,0 @@
-"""Tiiny Image Agency."""

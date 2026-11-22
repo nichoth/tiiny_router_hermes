@@ -1,0 +1,43 @@
+{
+  "name": "hermes-tiiny-router",
+  "version": "2.1.0",
+  "description": "Install Tiiny model routing into the Hermes agent harness",
+  "type": "module",
+  "bin": {
+    "hermesrouter": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "tiiny-router",
+    "!**/__pycache__"
+  ],
+  "os": [
+    "darwin",
+    "linux"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node --test test/*.test.ts && python3 -B test/test_installed_tree.py && python3 -B test/test_register.py && python3 -B test/test_plan_path.py",
+    "prepack": "npm run build",
+    "version": "node scripts/stamp-version.ts && git add tiiny-router/plugin.yaml tiiny-router/SKILL.md",
+    "toc": "markdown-toc --maxdepth 3 -i README.md"
+  },
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Gary Garcia (garciacionet-alt)"
+    },
+    {
+      "name": "nichoth"
+    }
+  ],
+  "devDependencies": {
+    "@substrate-system/redeye": "^0.1.8",
+    "@types/node": "^26.6.6",
+    "markdown-toc": "^1.2.0",
+    "typescript": "^7.0.2"
+  }
+}

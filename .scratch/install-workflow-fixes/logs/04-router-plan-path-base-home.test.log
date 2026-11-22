@@ -1,0 +1,69 @@
+npm notice run hermes-tiiny-router@2.1.0 test
+npm notice run npm run build && node --test test/*.test.ts && python3 -B test/test_installed_tree.py && python3 -B test/test_register.py && python3 -B test/test_plan_path.py
+npm notice run hermes-tiiny-router@2.1.0 build
+npm notice run tsc
+✔ install --configure selects the routing backend (8373.837834ms)
+✔ install --configure adds the tiiny provider (9131.820584ms)
+✔ install --no-configure leaves Hermes config alone (1777.97ms)
+✔ a non-interactive install with neither flag only prints (2738.133791ms)
+✔ install --configure never touches config.yaml or .env (6566.377959ms)
+✔ install --no-configure never touches config.yaml or .env (2080.300041ms)
+✔ install with neither flag never touches config.yaml or .env (2065.41025ms)
+✔ install --configure exits non-zero when config set fails (1892.689042ms)
+✔ doctor exits zero on a healthy install without a device (8620.1415ms)
+✔ doctor exits non-zero when an installed file is deleted (7189.839625ms)
+✔ doctor exits non-zero when the installed version differs (6132.390667ms)
+✔ doctor exits non-zero when an installed file is edited (5609.443459ms)
+✔ doctor exits non-zero when delegation.backend is set to another backend (6544.029958ms)
+✔ doctor exits non-zero when delegation.backend is not set (6104.154875ms)
+✔ doctor exits non-zero when hermes plugins validate fails (6924.165792ms)
+✔ install into an empty HERMES_HOME creates the plugin directory (1838.820375ms)
+✔ install respects a non-default HERMES_HOME (2743.480292ms)
+✔ install validates the installed directory with hermes (2864.075833ms)
+✔ install exits non-zero when hermes rejects the plugin (2241.948208ms)
+✔ installing twice with no edits in between succeeds (4319.149333ms)
+✔ install never modifies config.yaml or the secrets file (3106.711333ms)
+✔ install stops when an installed file was edited (2821.699375ms)
+✔ install --force replaces an edited file (4507.315084ms)
+✔ install leaves a directory it did not install untouched (489.329584ms)
+✔ install --force installs over a foreign directory (3136.75775ms)
+✔ upgrading removes files the new version no longer ships (3511.633208ms)
+✔ upgrading keeps files the user added that no install wrote (3146.47025ms)
+✔ ctl passes its arguments to the installed controller (3563.156125ms)
+✔ route-check passes its arguments to the installed checker (4842.867875ms)
+✔ ctl exits with the script's exit code (5811.617542ms)
+✔ route-check exits with the script's exit code (4895.861041ms)
+✔ ctl exits non-zero without an install (722.1355ms)
+✔ route-check exits non-zero without an install (1453.870125ms)
+✔ uninstall removes the installed plugin directory (4264.5245ms)
+✔ uninstall leaves the rest of HERMES_HOME unchanged (4629.374208ms)
+✔ uninstall refuses a directory with no manifest (866.737834ms)
+✔ uninstall refuses a manifest written by another package (1121.164042ms)
+✔ uninstall with nothing installed exits zero (922.547708ms)
+✔ uninstall makes no hermes config set call (3331.137083ms)
+✔ installed plugin.yaml and manifest carry the package version (3092.813292ms)
+✔ installed SKILL.md front matter carries the package version (2314.430375ms)
+✔ the stamp script copies a new package version into the plugin (1851.608958ms)
+ℹ tests 42
+ℹ suites 0
+ℹ pass 42
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 49422.97925
+......
+----------------------------------------------------------------------
+Ran 6 tests in 8.931s
+
+OK
+...
+----------------------------------------------------------------------
+Ran 3 tests in 1.148s
+
+OK
+...
+----------------------------------------------------------------------
+Ran 3 tests in 7.743s
+
+OK

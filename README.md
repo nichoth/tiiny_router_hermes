@@ -1,61 +1,327 @@
-# AI_Articles
+# tiiny-router-hermes
 
-Published articles and essays on AI tools, agent patterns, and productivity systems.
+Tiiny model routing for the Hermes harness.
 
-By [Gary Garcia](https://github.com/garciacionet-alt) · `#TheStrategicTechnicalAlliancesGuy`
+This package chooses which model does each job.
+Each specialist model gets the task's goal and context without
+inheriting the manager's full conversation history.
+See
+[Hermes delegation](https://hermes-agent.nousresearch.com/docs/user-guide/features/delegation).
 
-[![XERJ Corpus Hub contributor](https://hub.xerj.org/contributors/garciacionet-alt/badge.svg)](https://hub.xerj.org/contributors/garciacionet-alt)
+This installs global config, in `~/.hermes/` -- a Hermes plugin,
+controller scripts, and a skill for delegating tasks on
+a Tiiny hardware device. (Hermes loads plugins from `$HERMES_HOME/plugins/`.)
 
----
+We are using Hermes's pluggable `DelegationProvider` to select
+a model, provider, and reasoning settings for each subtask.
 
-## What this repo is
 
-A small, personal publication of reference patterns and practical essays for people using AI agents to do real work. Each article ships with a portable pattern description and a concrete implementation guide.
+<details><summary><h2>Contents</h2></summary>
 
-Articles are written from the practitioner side — after running the pattern, not before.
+<!-- toc -->
 
-## Articles
+- [Prerequisites](#prerequisites)
+- [Install](#install)
+- [What is the Hermes harness?](#what-is-the-hermes-harness)
+- [Request flow](#request-flow)
+- [When Tiiny routing applies](#when-tiiny-routing-applies)
+- [Reducing model swaps](#reducing-model-swaps)
+- [The config step](#the-config-step)
+  * [Settings written by the installer](#settings-written-by-the-installer)
+- [Check the install](#check-the-install)
+- [Upgrade](#upgrade)
+- [Uninstall](#uninstall)
+- [More](#more)
 
-| Article | What it covers | Pattern | Implementation |
-|---|---|---|---|
-| [Agent Memory Commons](./agent-memory-commons/) | A shared file space that lets multiple AI agents (Hermes, Claude Code, Minimax M3, OpenCode, OpenHuman, custom openclaw) share context through a synced Obsidian vault — no coordination overhead, no API contracts — plus the operating layer that keeps it legible: a root protocol file, a closed frontmatter vocabulary, a read-only linter, live views, and a session-end ritual, and an optional version-control add-on for keeping a history of the vault's own structure | [PATTERN.md](./agent-memory-commons/PATTERN.md) | [IMPLEMENTATION.md](./agent-memory-commons/IMPLEMENTATION.md) |
-| [Bot Identity](./bot-identity/) | One credential per bot. Every framework makes multi-agent easy; almost none tell you to give each bot its own channel token and OAuth grant — and without one you cannot scope, revoke, or attribute anything to a specific agent | [PATTERN.md](./bot-identity/PATTERN.md) | [IMPLEMENTATION.md](./bot-identity/IMPLEMENTATION.md) |
-| [Tiiny Model Routing](./tiiny-model-routing/) | Routing delegated subtasks to the right model on a local appliance — the tier table, the NPU budget that constrains it, a delegation backend that routes per task, and a swap script that survives the watchdog | [README.md](./tiiny-model-routing/README.md) | [PATTERN.md](./tiiny-model-routing/PATTERN.md) · [IMPLEMENTATION.md](./tiiny-model-routing/IMPLEMENTATION.md) |
-| [Tiiny Two Boxes](./tiiny-two-boxes/) | Running two local appliances as one system — the per-device credential, address and lock a second box needs, the vault/flex role split that stops the boxes evicting each other, and the failures that look like hardware problems but are not | [README.md](./tiiny-two-boxes/README.md) | [PATTERN.md](./tiiny-two-boxes/PATTERN.md) · [IMPLEMENTATION.md](./tiiny-two-boxes/IMPLEMENTATION.md) |
-| [TiinyMesh](./tiiny-mesh/) | A multi-target inference gateway and control plane — turns multiple local appliances, Mac desktop models, and cloud providers into a single OpenAI-compatible endpoint with automated model borrowing, Agent Memory Commons health witnessing, OpenRouter credit tracking, and an in-flight cloud fallback toggle | [README.md](./tiiny-mesh/README.md) | [PATTERN.md](./tiiny-mesh/PATTERN.md) · [IMPLEMENTATION.md](./tiiny-mesh/IMPLEMENTATION.md) |
-| [Tiiny Image Agency](./tiiny-image-agency/) | An image-generation API on a local appliance — words become a requirement vector, a deterministic resolver picks the model and explains itself, residency is managed as one transaction against a shared NPU pool, and a browser surface shows what the device is doing. Ships the whole application, its 465 tests, and the skill. **Built on macOS; a Linux or Windows port is wanted and is three known edits away** | [README.md](./tiiny-image-agency/README.md) | [PATTERN.md](./tiiny-image-agency/PATTERN.md) · [IMPLEMENTATION.md](./tiiny-image-agency/IMPLEMENTATION.md) |
-| [Remote Agent Access](./remote-agent-access/) | Reaching an agent on your LAN from anywhere without opening a port — a chat bot as the remote control, the three planes of the design, and the routing that makes your own hardware worth reaching | [README.md](./remote-agent-access/README.md) | [PATTERN.md](./remote-agent-access/PATTERN.md) · [IMPLEMENTATION.md](./remote-agent-access/IMPLEMENTATION.md) |
-| [Private Agent Network](./private-agent-network/) | A private network for an agent estate that spans machines — your agent's core in a cloud VPS, your files on a machine at home, neither able to reach the other. The tailnet that joins them, the one public listener that genuinely has to be public, the name trap that breaks webhook URLs silently, and the healthchecks that exercise the path instead of the process | [README.md](./private-agent-network/README.md) | [PATTERN.md](./private-agent-network/PATTERN.md) · [IMPLEMENTATION.md](./private-agent-network/IMPLEMENTATION.md) |
-| [Muse Patterns](./muse-patterns/) | Proactive planning for an agent — standing objectives that say when something is worth doing, trust scoring that decides which of them have earned the right to speak up, and a daily scan that reads your work history for new ones. The design question is not what an agent can notice but what it is allowed to interrupt you about | [README.md](./muse-patterns/README.md) | [PATTERN.md](./muse-patterns/PATTERN.md) · [IMPLEMENTATION.md](./muse-patterns/IMPLEMENTATION.md) |
-| [Tiiny guides](./Tiiny/) | Reference for the Tiiny Octo and the TiinyOS software it ships — every documentation surface the device exposes, how to tell the shipped documentation apart from your own data, where your API calls actually go, and what every model in the Model Store is actually good at | [README.md](./Tiiny/README.md) | [api-call-logging.md](./Tiiny/api-call-logging.md) · [model-catalogue.md](./Tiiny/model-catalogue.md) |
+<!-- tocstop -->
 
-More articles coming.
+</details>
 
----
+## Prerequisites
 
-## How to read
+* [Hermes](https://hermes-agent.nousresearch.com/) installed
+* a [tiiny device](https://tiiny.ai/)
 
-Each article follows the same shape:
+## Install
 
-- **README** — entry point, audience, quick-start
-- **PATTERN** — the portable pattern: why, what, design principles, failure modes. Read this if you want the mental model.
-- **IMPLEMENTATION** — the concrete setup: env vars, commands, prompts, shell scripts, end-to-end checklist. Read this if you're going to build it.
-- **scripts/** — runnable shell scripts you can copy and adapt.
-- **examples/** — worked examples of the pattern in practice, copyable as templates.
+The npm package is `hermes-tiiny-router`. The command is `hermesrouter`
+The install command is `npx hermesrouter install`.
 
-If you only have ten minutes, read the article's README. If you have an hour, read README + PATTERN. If you're going to build it, also read IMPLEMENTATION and run the scripts.
+```sh
+npm i -D hermes-tiiny-router
+```
 
-## Audience
+Install the Hermes plugin, then choose whether to configure it (see
+[the config step](#the-config-step)):
 
-This repo is for people using AI agents to do professional work — partnerships, alliances, technical sales, product work, research — and finding the lack of inter-agent context painful.
+```bash
+npx hermesrouter install
+```
 
-If you only run one agent on one computer, this repo is overkill. If you run two or more agents and want them to stop re-learning the same context every session, you'll find something useful here.
+This copies a directory to `$HERMES_HOME/plugins/tiiny-router/`
+(`HERMES_HOME` defaults to `~/.hermes`). It holds the routing backend, the
+controller scripts and the skill, which Hermes serves as
+`tiiny-router:tiiny-model-routing`. The installer then runs
+`hermes plugins validate` on the directory.
 
-## License
+Installing the npm dependency alone does not install or configure the
+Hermes plugin. **The plugin is installed at the Hermes user level**,
+even when the npm dependency is local to a project.
 
-- **Prose content** (READMEs, PATTERN.md, IMPLEMENTATION.md) — [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Free to share and adapt with attribution.
-- **Code and scripts** (`scripts/`, `examples/`) — [MIT License](./LICENSE). See `LICENSE` for full terms.
+Add the device's bearer token to `~/.hermes/.env` yourself.
 
----
+```sh
+# ~/.hermes/.env
+TIINY_API_KEY="..."
+```
 
-*This is a personal publication. Articles represent current thinking and are subject to revision.*
+## What is the Hermes harness?
+
+[Hermes Agent][hermes] is a harness from Nous Research. It provides the
+execution loop, model-provider integration, and session storage, along
+with persistent memory, reusable skills, scheduled tasks, messaging
+integrations, and subagent delegation. Its learning features include
+saving and improving skills and memories across sessions.
+
+This plugin selects models for subtasks.
+
+## Request flow
+
+With delegation configured to use Tiiny:
+
+```text
+Your request
+  -> Hermes manager agent
+  -> delegate_task(goal, context)
+  -> Tiiny routing backend
+  -> selected model on the Tiiny device
+  -> result returned to the manager
+```
+
+Hermes supplies the child agent's execution loop, tools, and isolated
+conversation. This plugin selects the model, taking the task, the batch
+plan, and the device's loaded models into account. See
+[Hermes delegation][hermes-delegation] for how child agents run and return
+their results.
+
+## When Tiiny routing applies
+
+The intended scope is **Hermes delegating work to Tiiny hardware**. The
+manager can use a cloud model; it does not need to run on Tiiny. Installing
+this package does not change how other agent harnesses route tasks.
+
+Hermes calls this router for `delegate_task` when its configuration selects
+`delegation.backend: tiiny-router`. That selection persists across new
+sessions using the same configuration. Changing the manager's model or
+provider does not turn the router on or off.
+
+**The current code does not enforce a Tiiny-only guard.** The skill tells
+the manager to use it only with Tiiny, but the backend does not validate
+the delegation provider or endpoint before choosing a Tiiny model and
+contacting the device. It copies the delegation configuration into the
+returned route, then sets the model and reasoning overrides. Selecting
+this backend alone does not bind the child to the `tiiny` provider.
+
+The installer adds that provider but does not set `delegation.provider`.
+For Tiiny workers, explicitly select it in the same Hermes configuration:
+
+```bash
+hermes config set delegation.provider tiiny
+```
+
+Check existing delegation overrides too: `delegation.base_url` takes
+precedence over the provider. Without a delegation provider or endpoint,
+children inherit the manager's provider and credentials. An unreachable
+device does not automatically disable this backend, and configured
+fallback providers can send failed child tasks to a cloud model.
+
+Use a dedicated [Hermes profile][hermes-profiles] for Tiiny work, with the
+backend set to `default` in configurations used for other providers. Set
+`HERMES_HOME` explicitly when installing for a profile so the package and
+its `hermes` subprocesses target the same home. For example, after creating
+a profile named `tiiny`:
+
+```bash
+HERMES_HOME="$HOME/.hermes/profiles/tiiny" \
+  npx hermesrouter install --configure
+HERMES_HOME="$HOME/.hermes/profiles/tiiny" \
+  hermes config set delegation.provider tiiny
+```
+
+This separates the configurations; a runtime check would still be needed
+to guarantee that this backend cannot be used with a non-Tiiny route.
+
+## Reducing model swaps
+
+The package helps avoid repeated loading and unloading in two ways:
+
+- **Reuse loaded models.** For each task, the router first considers its
+  planned model if loaded, then loaded candidates in the task's tier,
+  then the loaded generalist. Without a loaded match, it chooses the
+  tier's default; if residency cannot be read, it uses the generalist
+  unless a plan supplies a model. By default it calls the controller's
+  `ensure_model` before returning the route. An already loaded model is
+  checked and reused rather than reloaded.
+- **Plan model-loading waves.** Given several goals, the controller's
+  `plan` command chooses their models, collects the distinct models,
+  and packs them into waves whose combined NPU share fits within 100%.
+  Models already loaded are packed first. Every task assigned to a
+  particular model gets that model's wave number. A wave can contain
+  several models if they fit together.
+
+For example, independent goals that would alternate between two models
+that cannot fit together can instead run all work for one model before
+loading the other. Loading a wave keeps other resident models when there
+is room and skips loading models that are already resident.
+
+**Grouping is planned, but execution depends on the manager following the
+skill.** The router handles one task at a time; it does not maintain a
+queue or reorder arbitrary `delegate_task` calls. The installed skill
+instructs the manager to plan the batch, reserve the device, load a wave,
+finish that wave's work, then load the next. The skill also instructs the
+manager to run only one generation-heavy child at a time. After the batch,
+`release` restores the controller's required models and clears the plan
+and lock; restoration can itself require loading models.
+
+Ad hoc delegation still gets model selection and on-demand loading, but
+does not get automatic grouping across separate calls. Batching reduces
+swaps when the work permits it; it does not eliminate their time cost.
+See the [routing skill](tiiny-router/SKILL.md) for the full procedure.
+
+## The config step
+
+`npx hermesrouter install` copies the plugin and validates it, then offers
+to change Hermes configuration through `hermes config set`.
+
+```bash
+npx hermesrouter install                 # prompts in a terminal
+npx hermesrouter install --configure     # applies without asking
+npx hermesrouter install --no-configure  # installs files only
+```
+
+Without a terminal and without either flag, it skips configuration and
+prints the commands. Declining the prompt or using `--no-configure` also
+leaves settings unchanged.
+
+These are persistent Hermes user settings, not settings in the npm
+project. With the default Hermes home/profile they live in
+`~/.hermes/config.yaml`; a named profile has its own configuration. The
+installer copies files to `$HERMES_HOME/plugins/tiiny-router/` (falling
+back to `~/.hermes`) and lets the invoked `hermes` command choose its
+configuration. Use an explicit `HERMES_HOME` to keep those targets aligned
+when working with profiles.
+
+### Settings written by the installer
+
+The config step sets `delegation.backend` to `tiiny-router`, enables the
+plugin with `hermes plugins enable tiiny-router`, and writes the following
+fields under `providers.tiiny`:
+
+| Field | Value |
+| --- | --- |
+| `name` | `tiiny` |
+| `api` | `http://openai.api.tiiny/v1` |
+| `key_env` | `TIINY_API_KEY` |
+| `transport` | `chat_completions` |
+| `default_model` | `Qwen/Qwen3.6-35B-A3B` |
+| `context_length` | `262144` |
+| `models_discovered` | `false` |
+| `extra_body.chat_template_kwargs.enable_thinking` | `false` |
+| `models` | The six model IDs and context lengths in [config.ts][config]. |
+
+The `models` map is written as one value. These writes replace existing
+values at the listed keys, including any previous backend selection or
+customized Tiiny model map. Other configuration keys are left as they are.
+If a `hermes config set` call fails, earlier changes remain applied; the
+command reports the failure without rolling them back.
+
+The installer does not select the manager's model or provider, set
+`delegation.provider`, `delegation.base_url`, or
+`delegation.fallback_providers`, download models, or load/unload them.
+The installer itself does not edit `config.yaml` directly, and it never
+edits `.env`; add `TIINY_API_KEY` yourself as described above. The skill
+is served from the plugin directory, without a separate copy under
+`~/.hermes/skills/`.
+
+A saved `delegation.backend` takes effect from the next Hermes session, not
+the current one. Restart the gateway or start a new session.
+
+## Check the install
+
+```bash
+npx hermesrouter doctor
+```
+
+`doctor` prints a pass, warn or fail line for each check: the installed
+directory is complete, its version matches the package, no installed file
+was edited, `hermes plugins validate` passes, `delegation.backend` selects
+`tiiny-router`, the plugin is enabled in `plugins.enabled`, `python3` is
+present, and the device answers. It exits
+non-zero when any check fails. A device that cannot be reached is a
+warning, not a failure.
+
+To see where a goal would be routed, and to drive the controller, run the
+installed scripts through the package:
+
+```bash
+npx hermesrouter route-check "index every file in the notes folder"
+npx hermesrouter route-check --all
+npx hermesrouter ctl status
+npx hermesrouter ctl ensure --model "Qwen/Qwen3.6-35B-A3B"
+```
+
+`route-check` and `ctl` run `scripts/route_check.py` and
+`scripts/tiiny_ctl.py` from the installed directory with the system
+`python3`, passing the arguments and the exit code through.
+
+## Upgrade
+
+Run `install` again with the newer package:
+
+```bash
+npm install -D hermes-tiiny-router@latest
+npx hermesrouter install
+```
+
+`install` keeps a manifest of what it wrote. If a file in the installed
+directory was edited since then, or the directory was not installed by this
+package (for example an older copy made by hand), it lists the problem and
+stops. Re-run with `--force` to overwrite.
+
+## Uninstall
+
+```bash
+npx hermesrouter uninstall
+```
+
+This removes `$HERMES_HOME/plugins/tiiny-router/`, and only when its
+manifest shows this package installed it. It does not change Hermes
+config; it prints the commands that unselect the backend and disable the
+plugin.
+
+To restore ordinary delegation, run these in the same Hermes configuration
+before starting another session:
+
+```bash
+hermes config set delegation.backend default
+hermes plugins disable tiiny-router
+```
+
+Uninstall does not restore previous settings or remove `providers.tiiny`.
+Any delegation provider or endpoint you set separately also remains.
+
+## More
+
+- [tiiny-router/SKILL.md](tiiny-router/SKILL.md) -- the procedure the
+  manager agent follows: pick, fit, reserve, load, supervise, verify,
+  release.
+- [docs/README.md](docs/README.md) -- why routing by task shape pays off.
+- [docs/PATTERN.md](docs/PATTERN.md) -- the routing pattern in full.
+- [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md) -- the backend, the
+  controller and an end-to-end checklist.
+
+[config]: src/config.ts
+[hermes]: https://hermes-agent.nousresearch.com/
+[hermes-delegation]: https://hermes-agent.nousresearch.com/docs/user-guide/features/delegation
+[hermes-profiles]: https://hermes-agent.nousresearch.com/docs/user-guide/profiles
+[pi]: https://github.com/badlogic/pi-mono

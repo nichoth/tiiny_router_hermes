@@ -1,0 +1,78 @@
+npm notice run hermes-tiiny-router@2.1.0 test
+npm notice run npm run build && node --test test/*.test.ts && python3 -B test/test_installed_tree.py && python3 -B test/test_register.py && python3 -B test/test_plan_path.py
+npm notice run hermes-tiiny-router@2.1.0 build
+npm notice run tsc
+✔ install --configure selects the routing backend (3073.555042ms)
+✔ install --configure adds the tiiny provider (3224.857917ms)
+✔ install --no-configure leaves Hermes config alone (6810.336041ms)
+✔ a non-interactive install with neither flag only prints (1759.757542ms)
+✔ install --configure never touches config.yaml or .env (6389.26575ms)
+✔ install --no-configure never touches config.yaml or .env (1120.128917ms)
+✔ install with neither flag never touches config.yaml or .env (704.366042ms)
+✔ config set sends false for boolean keys (3460.859583ms)
+✔ config set sends an integer literal for context_length (2029.756333ms)
+✔ config set sends models as JSON with tier model ids (2367.028958ms)
+✔ install --configure enables the plugin after config set (2562.799375ms)
+✔ install --configure exits non-zero when plugins enable fails (2887.698917ms)
+✔ install --configure exits non-zero when config set fails (1065.773375ms)
+✔ doctor exits zero on a healthy install without a device (3544.188292ms)
+✔ doctor exits non-zero when an installed file is deleted (5969.506625ms)
+✔ doctor exits non-zero when the installed version differs (7688.773334ms)
+✔ doctor exits non-zero when an installed file is edited (5610.660542ms)
+✔ doctor exits non-zero when delegation.backend is set to another backend (3404.830667ms)
+✔ doctor exits non-zero when delegation.backend is not set (2264.055709ms)
+✔ doctor exits non-zero when plugins.enabled does not list tiiny-router (2430.686417ms)
+✔ doctor exits non-zero when plugins.disabled also lists tiiny-router (2697.207708ms)
+✔ doctor exits non-zero when plugins.enabled is not set (2769.046ms)
+✔ doctor exits zero when tiiny-router is among several enabled plugins (2253.01675ms)
+✔ doctor exits non-zero when hermes plugins validate fails (2440.655959ms)
+✔ install into an empty HERMES_HOME creates the plugin directory (1391.182125ms)
+✔ install respects a non-default HERMES_HOME (1589.5655ms)
+✔ install validates the installed directory with hermes (1678.466208ms)
+✔ install exits non-zero when hermes rejects the plugin (4907.839042ms)
+✔ installing twice with no edits in between succeeds (5657.238209ms)
+✔ install never modifies config.yaml or the secrets file (1972.732083ms)
+✔ install stops when an installed file was edited (1869.84175ms)
+✔ install --force replaces an edited file (3315.049916ms)
+✔ install leaves a directory it did not install untouched (255.670084ms)
+✔ install --force installs over a foreign directory (1096.555666ms)
+✔ upgrading removes files the new version no longer ships (1553.125833ms)
+✔ upgrading keeps files the user added that no install wrote (1538.121084ms)
+✔ ctl passes its arguments to the installed controller (3260.687708ms)
+✔ route-check passes its arguments to the installed checker (3518.964291ms)
+✔ ctl exits with the script's exit code (8530.761417ms)
+✔ route-check exits with the script's exit code (3987.345334ms)
+✔ ctl exits non-zero without an install (1475.066958ms)
+✔ route-check exits non-zero without an install (606.3915ms)
+✔ uninstall removes the installed plugin directory (2236.213292ms)
+✔ uninstall leaves the rest of HERMES_HOME unchanged (2001.289666ms)
+✔ uninstall refuses a directory with no manifest (363.072792ms)
+✔ uninstall refuses a manifest written by another package (239.452417ms)
+✔ uninstall with nothing installed exits zero (269.615792ms)
+✔ uninstall makes no hermes config or plugins call (6755.717417ms)
+✔ installed plugin.yaml and manifest carry the package version (2168.483583ms)
+✔ installed SKILL.md front matter carries the package version (971.190917ms)
+✔ the stamp script copies a new package version into the plugin (632.941333ms)
+ℹ tests 51
+ℹ suites 0
+ℹ pass 51
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 41690.485875
+......
+----------------------------------------------------------------------
+Ran 6 tests in 4.624s
+
+OK
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.602s
+
+OK
+...
+----------------------------------------------------------------------
+Ran 3 tests in 3.306s
+
+OK

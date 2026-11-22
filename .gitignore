@@ -21,4 +21,6 @@ Thumbs.db
 
 # Local scratch / scratch dirs that should never be committed
 scratch/
-*.scratch
+*.scratch.claude
+node_modules
+dist
