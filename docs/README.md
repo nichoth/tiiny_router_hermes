@@ -1,7 +1,7 @@
 # Routing Work to the Right Model
 
-**A management agency's agents do not all do the same job. Pinning them to one
-model wastes the cheap tasks and starves the expensive ones.**
+A management agency's agents do not all do the same job. Pinning them to one
+model wastes the cheap tasks and starves the expensive ones.
 
 An agency running agent fleets has a routing problem before it has a cost
 problem. The research sweep, the document index, the code fix, the browser

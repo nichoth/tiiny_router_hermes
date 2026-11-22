@@ -71,13 +71,15 @@ loaded becomes the specialist the child actually runs on.
    delegation:
      backend: tiiny-router
      provider: tiiny
+     base_url: ''
      fallback_providers:
        - provider: minimax
          model: MiniMax-M3
    ```
 
-   The fallback matters: if the device is unreachable, the batch should still
-   complete on a paid provider rather than fail. It should also be visible
+   The config step clears `delegation.base_url` so the provider's endpoint
+   is used. The fallback matters: if the device is unreachable, the batch
+   should complete on a paid provider rather than fail. It should be visible
    when it happens -- a silent fallback means the local tier is not actually
    being used.
 

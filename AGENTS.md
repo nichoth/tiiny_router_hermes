@@ -17,7 +17,8 @@ The install steps are (the user-facing version is `README.md`):
    touches that file.
 3. Let the config step add the `tiiny` provider, set
    `delegation.backend: tiiny-router` and `delegation.provider: tiiny`,
-   and enable the plugin (prompted, or `--configure`).
+   clear `delegation.base_url`, and enable the plugin
+   (prompted, or `--configure`).
 4. Run `npx --package hermes-tiiny-router hermesrouter doctor`, then check
    a goal with
    `npx --package hermes-tiiny-router hermesrouter route-check "..."`, then

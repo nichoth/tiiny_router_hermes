@@ -54,6 +54,7 @@ export const SETTINGS:ConfigSetting[] = [
     [`${PROVIDER}.models`, JSON.stringify(TIINY_MODELS)],
     ['delegation.backend', PLUGIN_NAME],
     ['delegation.provider', 'tiiny'],
+    ['delegation.base_url', ''],
 ]
 
 /** Quote `s` for a POSIX shell. */
@@ -135,7 +136,8 @@ export function configStep (mode:ConfigMode):number {
     // non-blocking and the synchronous read then fails with EAGAIN.
     if (mode === 'ask' && isatty(0) && isatty(1)) {
         const question = 'Add the `tiiny` provider and select it for ' +
-            'delegation with the tiiny-router backend in Hermes config?'
+            'delegation with the tiiny-router backend, clearing any ' +
+            'delegation endpoint override in Hermes config?'
         if (confirm(question)) return applyConfig()
     }
     printCommands()
