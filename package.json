@@ -3,21 +3,19 @@
   "version": "2.1.0",
   "description": "Install Tiiny model routing into the Hermes agent harness",
   "type": "module",
+  "main": "index.js",
   "bin": {
     "hermesrouter": "dist/cli.js"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "test"
   },
   "files": [
     "dist",
     "tiiny-router",
     "!**/__pycache__"
   ],
-  "os": [
-    "darwin",
-    "linux"
-  ],
-  "engines": {
-    "node": ">=20"
-  },
   "scripts": {
     "build": "tsc",
     "test": "npm run build && node --test test/*.test.ts && python3 -B test/test_installed_tree.py && python3 -B test/test_register.py && python3 -B test/test_plan_path.py",
@@ -25,19 +23,42 @@
     "version": "node scripts/stamp-version.ts && git add tiiny-router/plugin.yaml tiiny-router/SKILL.md",
     "toc": "markdown-toc --maxdepth 3 -i README.md"
   },
-  "license": "MIT",
-  "contributors": [
-    {
-      "name": "Gary Garcia (garciacionet-alt)"
-    },
-    {
-      "name": "nichoth"
-    }
-  ],
   "devDependencies": {
     "@substrate-system/redeye": "^0.1.8",
     "@types/node": "^26.6.6",
     "markdown-toc": "^1.2.0",
     "typescript": "^7.0.2"
-  }
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "os": [
+    "darwin",
+    "linux"
+  ],
+  "keywords": [
+    "hermes",
+    "tiiny",
+    "ai",
+    "harness",
+    "agent"
+  ],
+  "homepage": "https://github.com/nichoth/tiiny_router_hermes",
+  "bugs": {
+    "url": "https://github.com/nichoth/tiiny_router_hermes/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nichoth/tiiny_router_hermes.git"
+  },
+  "license": "MIT",
+  "author": "nichoth",
+  "contributors": [
+    {
+      "name": "Gary Garcia"
+    },
+    {
+      "name": "nichoth"
+    }
+  ]
 }
