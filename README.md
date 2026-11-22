@@ -23,7 +23,6 @@ a model, provider, and reasoning settings for each subtask.
 <!-- toc -->
 
 - [Prerequisites](#prerequisites)
-- [Install](#install)
 - [Quickstart](#quickstart)
   * [1. Install](#1-install)
   * [2. Configure](#2-configure)
@@ -52,35 +51,6 @@ a model, provider, and reasoning settings for each subtask.
 * a [tiiny device](https://tiiny.ai/)
 * the `tiiny` CLI, signed in (see [3. tiiny CLI](#3-tiiny-cli))
 * `python3` on `PATH`
-
-## Install
-
-The npm package is `hermes-tiiny-router`. The command is `hermesrouter`.
-The install command is `npx hermesrouter install`.
-
-```sh
-npm i -D hermes-tiiny-router
-```
-
-Install the Hermes plugin, then choose whether to configure it (see
-[the config step](#the-config-step)):
-
-```bash
-npx hermesrouter install
-```
-
-This copies a directory to `$HERMES_HOME/plugins/tiiny-router/`
-(`HERMES_HOME` defaults to `~/.hermes`). It holds the routing backend, the
-controller scripts and the skill, which Hermes serves as
-`tiiny-router:tiiny-model-routing`. The installer then runs
-`hermes plugins validate` on the directory.
-
-Installing the npm dependency alone does not install or configure the
-Hermes plugin. **The plugin is installed at the Hermes user level**,
-even when the npm dependency is local to a project.
-
-Then add the device key and the rest of the settings
-in [2. Configure](#2-configure).
 
 ## Quickstart
 

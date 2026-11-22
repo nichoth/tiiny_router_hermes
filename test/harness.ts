@@ -57,6 +57,7 @@ export interface Env {
             hermesFails?:boolean,
             hermesFailsOn?:string[],
             hermesConfig?:Record<string, string>,
+            terminalAnswer?:string,
         }
     ):RunResult;
     /** argv of every call the fake `hermes` received, in order. */
@@ -103,7 +104,13 @@ export function makeEnv (opts:{ hermesHome?:string } = {}):Env {
             env.TIINY_BASE_URL = 'http://127.0.0.1:9/v1'
             env.TIINY_HOST = 'http://127.0.0.1:9'
             if (opts.hermesHome) env.HERMES_HOME = hermesHome
-            const r = spawnSync(process.execPath, [CLI, ...args], {
+            const command = runOpts.terminalAnswer === undefined ?
+                [process.execPath, CLI, ...args] :
+                [
+                    'python3', '-B', path.join(HERE, 'terminal-session.py'),
+                    runOpts.terminalAnswer, process.execPath, CLI, ...args,
+                ]
+            const r = spawnSync(command[0], command.slice(1), {
                 env,
                 encoding: 'utf8',
                 stdio: ['ignore', 'pipe', 'pipe'],

@@ -99,6 +99,38 @@ test('a non-interactive install with neither flag only prints', t => {
     )
 })
 
+for (const answer of ['y', 'n', '']) {
+    test(`terminal install shows a readable prompt: ${answer || 'Enter'}`,
+        t => {
+            const env = makeEnv()
+            t.after(() => env.cleanup())
+            const r = env.run(['install'], { terminalAnswer: answer })
+            assert.equal(r.status, 0, r.stderr)
+
+            const question = r.stdout.slice(r.stdout.indexOf('Add the '))
+            const prompt = question.slice(0, question.indexOf('[y/N] ') + 6)
+            const lines = prompt.replaceAll('\r', '').split('\n')
+            assert.ok(
+                lines.every(line => line.length <= 72),
+                `prompt must fit a narrow terminal:\n${prompt}`
+            )
+            assert.match(lines.at(-1) ?? '', /^\[y\/N\] $/)
+
+            const sets = configSets(env.hermesCalls())
+            if (answer === 'y') {
+                assert.equal(
+                    new Map(sets).get('delegation.provider'), 'tiiny'
+                )
+                assert.deepEqual(pluginEnables(env.hermesCalls()), [
+                    ['plugins', 'enable', 'tiiny-router'],
+                ])
+            } else {
+                assert.deepEqual(sets, [])
+                assert.deepEqual(pluginEnables(env.hermesCalls()), [])
+            }
+        })
+}
+
 for (const flags of [['--configure'], ['--no-configure'], []]) {
     const name = flags.join(' ') || 'with neither flag'
     test(`install ${name} never touches config.yaml or .env`, t => {

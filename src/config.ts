@@ -115,7 +115,7 @@ function readLine ():string {
 }
 
 function confirm (question:string):boolean {
-    process.stdout.write(`${question} [y/N] `)
+    process.stdout.write(`${question}\n[y/N] `)
     return /^y(es)?$/i.test(readLine().trim())
 }
 
@@ -136,7 +136,7 @@ export function configStep (mode:ConfigMode):number {
     // non-blocking and the synchronous read then fails with EAGAIN.
     if (mode === 'ask' && isatty(0) && isatty(1)) {
         const question = 'Add the `tiiny` provider and select it for ' +
-            'delegation with the tiiny-router backend, clearing any ' +
+            'delegation\nwith the tiiny-router backend, clearing any\n' +
             'delegation endpoint override in Hermes config?'
         if (confirm(question)) return applyConfig()
     }
