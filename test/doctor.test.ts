@@ -8,7 +8,8 @@ import { makeEnv } from './harness.ts'
 
 const SELECTED = {
     'delegation.backend': 'tiiny-router',
-    'plugins.enabled': 'tiiny-router',
+    'plugins.enabled': '["tiiny-router"]',
+    'plugins.disabled': '[]',
 }
 
 /**
@@ -28,6 +29,13 @@ test('doctor exits zero on a healthy install without a device', t => {
     const { env } = installed(t)
     const r = env.run(['doctor'], { hermesConfig: SELECTED })
     assert.equal(r.status, 0, r.stdout + r.stderr)
+    for (const key of ['plugins.enabled', 'plugins.disabled']) {
+        assert.ok(
+            env.hermesCalls().some(argv =>
+                argv.join(' ') === `config get ${key} --json`),
+            `reads ${key} as JSON`
+        )
+    }
 })
 
 test('doctor exits non-zero when an installed file is deleted', t => {
@@ -70,35 +78,35 @@ for (const [label, config] of [
     })
 }
 
-test('doctor exits non-zero when plugins.enabled does not list tiiny-router', t => {
+test('doctor fails when plugins.enabled omits tiiny-router', t => {
     const { env } = installed(t)
     const r = env.run(['doctor'], {
         hermesConfig: {
             'delegation.backend': 'tiiny-router',
-            'plugins.enabled': 'other-plugin',
+            'plugins.enabled': '["other-plugin"]',
         },
     })
     assert.notEqual(r.status, 0, r.stdout)
     assert.ok(
         env.hermesCalls().some(argv =>
-            argv.join(' ') === 'config get plugins.enabled'),
+            argv.join(' ') === 'config get plugins.enabled --json'),
         'reads plugins.enabled through `hermes config get`'
     )
 })
 
-test('doctor exits non-zero when plugins.disabled also lists tiiny-router', t => {
+test('doctor fails when plugins.disabled also lists tiiny-router', t => {
     const { env } = installed(t)
     const r = env.run(['doctor'], {
         hermesConfig: {
             'delegation.backend': 'tiiny-router',
-            'plugins.enabled': 'tiiny-router',
-            'plugins.disabled': 'tiiny-router',
+            'plugins.enabled': '["tiiny-router"]',
+            'plugins.disabled': '["tiiny-router"]',
         },
     })
     assert.notEqual(r.status, 0, r.stdout)
     assert.ok(
         env.hermesCalls().some(argv =>
-            argv.join(' ') === 'config get plugins.disabled'),
+            argv.join(' ') === 'config get plugins.disabled --json'),
         'reads plugins.disabled through `hermes config get`'
     )
 })
@@ -111,12 +119,14 @@ test('doctor exits non-zero when plugins.enabled is not set', t => {
     assert.notEqual(r.status, 0, r.stdout)
 })
 
-test('doctor exits zero when tiiny-router is among several enabled plugins', t => {
+test('doctor accepts tiiny-router among several enabled plugins', t => {
     const { env } = installed(t)
     const r = env.run(['doctor'], {
         hermesConfig: {
             'delegation.backend': 'tiiny-router',
-            'plugins.enabled': 'other-plugin,tiiny-router,another',
+            'plugins.enabled':
+                '["other-plugin", "tiiny-router", "another"]',
+            'plugins.disabled': '["other-plugin"]',
         },
     })
     assert.equal(r.status, 0, r.stdout + r.stderr)
@@ -135,3 +145,27 @@ test('doctor exits non-zero when hermes plugins validate fails', t => {
         'validates the installed directory'
     )
 })
+
+for (const key of ['plugins.enabled', 'plugins.disabled']) {
+    for (const value of [
+        '"tiiny-router"', 'null', '{}', '["tiiny-router", 1]',
+        '- tiiny-router', '',
+    ]) {
+        test(`doctor rejects invalid ${key}: ${value}`, t => {
+            const { env } = installed(t)
+            const r = env.run(['doctor'], {
+                hermesConfig: { ...SELECTED, [key]: value },
+            })
+            assert.notEqual(r.status, 0, r.stdout)
+        })
+    }
+
+    test(`doctor fails when reading ${key} fails`, t => {
+        const { env } = installed(t)
+        const r = env.run(['doctor'], {
+            hermesConfig: SELECTED,
+            hermesFailsOn: ['config', 'get', key],
+        })
+        assert.notEqual(r.status, 0, r.stdout)
+    })
+}
