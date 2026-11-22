@@ -24,3 +24,6 @@ scratch/
 *.scratch.claude
 node_modules
 dist
+.agents
+.claude
+
