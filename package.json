@@ -20,8 +20,9 @@
     "build": "tsc",
     "test": "npm run build && node --test test/*.test.ts && python3 -B test/test_installed_tree.py && python3 -B test/test_register.py && python3 -B test/test_plan_path.py",
     "prepack": "npm run build",
-    "version": "node scripts/stamp-version.ts && git add tiiny-router/plugin.yaml tiiny-router/SKILL.md",
-    "toc": "markdown-toc --maxdepth 3 -i README.md"
+    "toc": "markdown-toc --maxdepth 3 -i README.md",
+    "version": "npm run toc && node scripts/stamp-version.ts && git add README.md tiiny-router/plugin.yaml tiiny-router/SKILL.md",
+    "postversion": "git push --follow-tags && npm publish"
   },
   "devDependencies": {
     "@substrate-system/redeye": "^0.1.8",

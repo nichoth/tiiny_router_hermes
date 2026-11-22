@@ -26,5 +26,4 @@ node_modules
 dist
 .agents
 .claude
-
 .scratch
