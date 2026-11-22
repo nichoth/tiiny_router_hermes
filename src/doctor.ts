@@ -1,3 +1,4 @@
+// pattern: Imperative Shell
 /**
  * `doctor`: check that the install is complete and healthy, one line per
  * check. Any failed check makes the exit code non-zero; an unreachable
@@ -54,6 +55,26 @@ function python3Version ():string|null {
     const r = spawnSync('python3', ['--version'], { encoding: 'utf8' })
     if (r.error || r.status !== 0) return null
     return (r.stdout || r.stderr).trim()
+}
+
+/** Read a plugin list using Hermes's machine-readable output. */
+function pluginList (key:string):Array<string> {
+    const r = hermesOutput(['config', 'get', key, '--json'])
+    if (r.status !== 0) {
+        throw new Error(`could not read ${key} (exit ${r.status})`)
+    }
+    let value:unknown
+    try {
+        value = JSON.parse(r.stdout)
+    } catch {
+        throw new Error(`invalid JSON from hermes config get ${key}`)
+    }
+    if (!Array.isArray(value) ||
+        !value.every((name:unknown):name is string =>
+            typeof name === 'string')) {
+        throw new Error(`${key} must be a JSON array of plugin names`)
+    }
+    return value
 }
 
 function checks (dir:string):Check[] {
@@ -134,28 +155,14 @@ function checks (dir:string):Check[] {
         {
             name: 'plugin enabled',
             run: () => {
-                const enabled = hermesOutput(
-                    ['config', 'get', 'plugins.enabled']
-                )
-                const list = enabled.stdout.trim()
-                    .replace(/^\[|]$/g, '')
-                    .split(/[,\n]/)
-                    .map(s => s.trim().replace(/^['"]|['"]$/g, ''))
-                    .filter(Boolean)
+                const list = pluginList('plugins.enabled')
                 if (!list.includes(PLUGIN_NAME)) {
                     return fail(
                         'not in plugins.enabled; run ' +
                         `hermes plugins enable ${PLUGIN_NAME}`
                     )
                 }
-                const disabled = hermesOutput(
-                    ['config', 'get', 'plugins.disabled']
-                )
-                const dList = disabled.stdout.trim()
-                    .replace(/^\[|]$/g, '')
-                    .split(/[,\n]/)
-                    .map(s => s.trim().replace(/^['"]|['"]$/g, ''))
-                    .filter(Boolean)
+                const dList = pluginList('plugins.disabled')
                 if (dList.includes(PLUGIN_NAME)) {
                     return fail(
                         'listed in plugins.disabled; run ' +
@@ -208,7 +215,9 @@ export function doctor ():number {
             result = fail((err as Error).message)
         }
         if (result.outcome === 'fail') failed++
-        console.log(`${LABEL[result.outcome]}  ${check.name}: ${result.detail}`)
+        console.log(
+            `${LABEL[result.outcome]}  ${check.name}: ${result.detail}`
+        )
     }
     if (failed) console.log(`\n${failed} check(s) failed`)
     return failed ? 1 : 0
