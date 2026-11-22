@@ -27,6 +27,15 @@ test('install --configure selects the routing backend', t => {
     assert.equal(sets.get('delegation.backend'), 'tiiny-router')
 })
 
+test('install --configure selects the tiiny delegation provider', t => {
+    const env = makeEnv()
+    t.after(() => env.cleanup())
+    const r = env.run(['install', '--configure'])
+    assert.equal(r.status, 0, r.stderr)
+    const sets = new Map(configSets(env.hermesCalls()))
+    assert.equal(sets.get('delegation.provider'), 'tiiny')
+})
+
 test('install --configure adds the tiiny provider', t => {
     const env = makeEnv()
     t.after(() => env.cleanup())

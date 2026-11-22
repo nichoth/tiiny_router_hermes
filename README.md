@@ -24,6 +24,11 @@ a model, provider, and reasoning settings for each subtask.
 
 - [Prerequisites](#prerequisites)
 - [Install](#install)
+- [Quickstart](#quickstart)
+  * [1. Install](#1-install)
+  * [2. Configure](#2-configure)
+  * [3. Check](#3-check)
+  * [4. Restart](#4-restart)
 - [What is the Hermes harness?](#what-is-the-hermes-harness)
 - [Request flow](#request-flow)
 - [When Tiiny routing applies](#when-tiiny-routing-applies)
@@ -43,10 +48,12 @@ a model, provider, and reasoning settings for each subtask.
 
 * [Hermes](https://hermes-agent.nousresearch.com/) installed
 * a [tiiny device](https://tiiny.ai/)
+* the `tiiny` CLI, signed in (see [4. tiiny CLI](#4-tiiny-cli))
+* `python3` on `PATH`
 
 ## Install
 
-The npm package is `hermes-tiiny-router`. The command is `hermesrouter`
+The npm package is `hermes-tiiny-router`. The command is `hermesrouter`.
 The install command is `npx hermesrouter install`.
 
 ```sh
@@ -70,12 +77,8 @@ Installing the npm dependency alone does not install or configure the
 Hermes plugin. **The plugin is installed at the Hermes user level**,
 even when the npm dependency is local to a project.
 
-Add the device's bearer token to `~/.hermes/.env` yourself.
-
-```sh
-# ~/.hermes/.env
-TIINY_API_KEY="..."
-```
+Then add the device key and the rest of the settings
+in [2. Configure](#2-configure).
 
 ## Quickstart
 
@@ -85,13 +88,13 @@ TIINY_API_KEY="..."
 npm i -D hermes-tiiny-router
 ```
 
-This installs the hermes-specific parts:
+#### Install Plugin
 
 ```sh
 npx hermesrouter install
 ```
 
-It writes these files, in `$HERMES_HOME` (default `~/.hermes`):
+It changes these files, in `$HERMES_HOME` (default `~/.hermes`):
 
 * `~/.hermes/plugins/tiiny-router/` -- the plugin files are copied here,
   along with an install manifest, `.hermes-tiiny-router-manifest.json`.
@@ -100,7 +103,8 @@ It writes these files, in `$HERMES_HOME` (default `~/.hermes`):
 * Hermes config, only if you accept the config step
   (it asks, or pass `--configure`). It runs `hermes config set` to
   add the `tiiny` provider (`providers.tiiny.*`) and set
-  `delegation.backend: tiiny-router`, then `hermes plugins enable tiiny-router`.
+  `delegation.backend: tiiny-router` and `delegation.provider: tiiny`,
+  then runs `hermes plugins enable tiiny-router`.
   Pass `--no-configure` to skip this.
 
 It also runs `hermes plugins validate` on the plugin directory, which
@@ -108,11 +112,89 @@ changes nothing. It never reads or writes `~/.hermes/.env`.
 
 ### 2. Configure
 
-Need the secret key in the env for Hermes. You can set it in `~/.hermes/.env`:
+Four things:
+
+#### 1. Device Key
+
+Need an API key either in the shell env or in the file `~/.hermes/.env`.
 
 ```sh
+# ~/.hermes/.env
 TIINY_API_KEY="..."
 ```
+
+#### 2. Delegation Provider
+
+The installer's config step defines the `tiiny` provider and selects it
+for delegated subtasks. Accept the prompt during `npx hermesrouter install`,
+or pass `--configure`, to handle this automatically.
+
+If you configured the provider yourself, select it with:
+
+```sh
+hermes config set delegation.provider tiiny
+```
+
+Hermes also accepts the canonical form, `custom:tiiny`. If
+`delegation.base_url` is set, it takes precedence over the provider,
+so clear it. See [When Tiiny routing applies](#when-tiiny-routing-applies).
+
+#### 3. Network
+
+The provider talks to `http://openai.api.tiiny/v1`, and the controller
+manages models through `http://tiinyhost.local`. Both names must resolve
+from the machine running Hermes, which normally means being on the same
+network as the device.
+
+#### 4. tiiny CLI
+
+The controller loads and unloads models with the `tiiny` CLI, expected at
+`~/.local/tiiny/bin/tiiny` (set `TIINY_BIN` to use another path). Sign it
+in to the device first; a signed-out CLI cannot load models. Check it
+with `tiiny top`.
+
+The controller can load over the device's HTTP API instead, but only with
+a device registry (`devices.py` beside `tiiny_ctl.py` or in
+`~/.hermes/mesh/`), which this package does not ship. Without the CLI,
+the backend still picks a model but cannot load it. The child request
+then fails with a 404, and goes to a fallback provider if one is set.
+
+#### Optional
+
+* **A fallback provider.** With `delegation.fallback_providers` set, a
+  child whose request to the device fails runs on that provider instead.
+  The installer does not set it. Example:
+  ```sh
+  hermes config set delegation.fallback_providers \
+    '[{"provider": "minimax", "model": "MiniMax-M3"}]'
+  ```
+
+* **A different device address.** The controller scripts read
+  `TIINY_HOST` (management) and `TIINY_BASE_URL` (inference) from the
+  environment or `~/.hermes/.env`. Child requests go to
+  `providers.tiiny.api`, so change that too with `hermes config set`.
+  The backend's own residency check always uses
+  `http://openai.api.tiiny/v1` (`tiers.py`), so it does not follow
+  either setting.
+* **Skip loading on route.** By default the backend loads the chosen
+  model before returning a route. Export `TIINY_ENSURE_ON_ROUTE=false` in
+  the environment Hermes starts in to skip that. The backend reads this
+  from the process environment only, not from `.env`.
+
+### 3. Check
+
+```sh
+npx hermesrouter doctor
+npx hermesrouter route-check "index every file in the notes folder"
+```
+
+`doctor` exits non-zero on a failed check. An unreachable device is only a
+warning, so read that line if the device should be up.
+
+### 4. Restart
+
+The backend selection takes effect in the next Hermes session. Restart
+the gateway or start a new session.
 
 
 ## What is the Hermes harness?
@@ -147,7 +229,7 @@ their results.
 ## When Tiiny routing applies
 
 The intended scope is **Hermes delegating work to Tiiny hardware**. The
-manager can use a cloud model; it does not need to run on Tiiny. Installing
+manager can use a cloud model -- it does not need to run on Tiiny. Installing
 this package does not change how other agent harnesses route tasks.
 
 Hermes calls this router for `delegate_task` when its configuration selects
@@ -162,12 +244,9 @@ contacting the device. It copies the delegation configuration into the
 returned route, then sets the model and reasoning overrides. Selecting
 this backend alone does not bind the child to the `tiiny` provider.
 
-The installer adds that provider but does not set `delegation.provider`.
-For Tiiny workers, explicitly select it in the same Hermes configuration:
-
-```bash
-hermes config set delegation.provider tiiny
-```
+The installer's config step adds the provider and sets
+`delegation.provider: tiiny` in the same Hermes configuration. Accept the
+config prompt or pass `--configure` to apply both selections.
 
 Check existing delegation overrides too: `delegation.base_url` takes
 precedence over the provider. Without a delegation provider or endpoint,
@@ -184,8 +263,6 @@ a profile named `tiiny`:
 ```bash
 HERMES_HOME="$HOME/.hermes/profiles/tiiny" \
   npx hermesrouter install --configure
-HERMES_HOME="$HOME/.hermes/profiles/tiiny" \
-  hermes config set delegation.provider tiiny
 ```
 
 This separates the configurations; a runtime check would still be needed
@@ -253,9 +330,10 @@ when working with profiles.
 
 ### Settings written by the installer
 
-The config step sets `delegation.backend` to `tiiny-router`, enables the
-plugin with `hermes plugins enable tiiny-router`, and writes the following
-fields under `providers.tiiny`:
+The config step sets `delegation.backend` to `tiiny-router` and
+`delegation.provider` to `tiiny`, enables the plugin with
+`hermes plugins enable tiiny-router`, and writes the following fields
+under `providers.tiiny`:
 
 | Field | Value |
 | --- | --- |
@@ -270,14 +348,15 @@ fields under `providers.tiiny`:
 | `models` | The six model IDs and context lengths in [config.ts][config]. |
 
 The `models` map is written as one value. These writes replace existing
-values at the listed keys, including any previous backend selection or
-customized Tiiny model map. Other configuration keys are left as they are.
+values at the listed keys, including any previous backend or delegation
+provider selection and customized Tiiny model map. Other configuration
+keys are left as they are.
 If a `hermes config set` call fails, earlier changes remain applied; the
 command reports the failure without rolling them back.
 
 The installer does not select the manager's model or provider, set
-`delegation.provider`, `delegation.base_url`, or
-`delegation.fallback_providers`, download models, or load/unload them.
+`delegation.base_url` or `delegation.fallback_providers`, download models,
+or load/unload them.
 The installer itself does not edit `config.yaml` directly, and it never
 edits `.env`; add `TIINY_API_KEY` yourself as described above. The skill
 is served from the plugin directory, without a separate copy under
@@ -348,7 +427,7 @@ hermes plugins disable tiiny-router
 ```
 
 Uninstall does not restore previous settings or remove `providers.tiiny`.
-Any delegation provider or endpoint you set separately also remains.
+The delegation provider selection and any endpoint override also remain.
 
 ## More
 

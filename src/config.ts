@@ -1,5 +1,6 @@
+// pattern: Imperative Shell
 /**
- * The config step: select the routing backend in Hermes config. Config is
+ * The config step: select the backend and provider in Hermes config. Config is
  * changed only through `hermes config set`; `config.yaml` and the secrets
  * file are never read or written here.
  */
@@ -52,6 +53,7 @@ export const SETTINGS:ConfigSetting[] = [
     [`${PROVIDER}.extra_body.chat_template_kwargs.enable_thinking`, 'false'],
     [`${PROVIDER}.models`, JSON.stringify(TIINY_MODELS)],
     ['delegation.backend', PLUGIN_NAME],
+    ['delegation.provider', 'tiiny'],
 ]
 
 /** Quote `s` for a POSIX shell. */
@@ -93,7 +95,7 @@ function applyConfig ():number {
         return enableStatus
     }
     console.log(
-        'Selected the tiiny-router delegation backend. ' +
+        'Selected the tiiny-router backend and tiiny delegation provider. ' +
         'It takes effect from the next Hermes session.'
     )
     return 0
@@ -118,7 +120,7 @@ function confirm (question:string):boolean {
 
 function printCommands ():void {
     console.log(
-        'Hermes config was not changed. To select the routing backend, run:'
+        'Hermes config was not changed. To configure Tiiny delegation, run:'
     )
     for (const cmd of configCommands()) console.log(`  ${cmd}`)
 }
@@ -132,8 +134,8 @@ export function configStep (mode:ConfigMode):number {
     // isatty, not process.stdin.isTTY: touching process.stdin makes fd 0
     // non-blocking and the synchronous read then fails with EAGAIN.
     if (mode === 'ask' && isatty(0) && isatty(1)) {
-        const question = 'Select the tiiny-router backend and add the ' +
-            '`tiiny` provider in Hermes config?'
+        const question = 'Add the `tiiny` provider and select it for ' +
+            'delegation with the tiiny-router backend in Hermes config?'
         if (confirm(question)) return applyConfig()
     }
     printCommands()

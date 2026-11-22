@@ -34,8 +34,8 @@ loaded becomes the specialist the child actually runs on.
    ```
 
 2. Add the device as a provider in the active profile's `config.yaml`.
-   `hermesrouter install --configure` does this and the backend
-   selection in step 3 through `hermes config set` (everything except
+   `hermesrouter install --configure` does this and the backend and
+   provider selections in step 3 through `hermes config set` (everything except
    `fallback_providers`, which depends on your paid provider):
 
    ```yaml
@@ -65,11 +65,12 @@ loaded becomes the specialist the child actually runs on.
    `models_discovered: false` matters: with it on, a live probe can wipe the
    metadata above and leave a model with the wrong context length.
 
-3. Select the backend in the same `config.yaml`:
+3. Select the backend and provider in the same `config.yaml`:
 
    ```yaml
    delegation:
      backend: tiiny-router
+     provider: tiiny
      fallback_providers:
        - provider: minimax
          model: MiniMax-M3

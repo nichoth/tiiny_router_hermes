@@ -12,9 +12,10 @@ Commands:
              Copy the plugin into $HERMES_HOME/plugins/tiiny-router/.
              Stops if installed files were edited or the directory was
              not installed by this package, unless --force is given.
-             Then offers to select it in Hermes config (--configure
-             applies without asking, --no-configure skips; without a
-             terminal the commands are printed instead)
+             Then offers to configure the backend and tiiny delegation
+             provider in Hermes config (--configure applies without
+             asking, --no-configure skips; without a terminal the
+             commands are printed instead)
   uninstall  Remove $HERMES_HOME/plugins/tiiny-router/
   doctor     Check the install, the Hermes config and the device;
              exits non-zero when a check fails

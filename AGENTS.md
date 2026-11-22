@@ -16,8 +16,8 @@ The install steps are (the user-facing version is `README.md`):
 2. Add `TIINY_API_KEY` to `~/.hermes/.env` by hand; the installer never
    touches that file.
 3. Let the config step add the `tiiny` provider, set
-   `delegation.backend: tiiny-router`, and enable the plugin
-   (prompted, or `--configure`).
+   `delegation.backend: tiiny-router` and `delegation.provider: tiiny`,
+   and enable the plugin (prompted, or `--configure`).
 4. Run `npx --package hermes-tiiny-router hermesrouter doctor`, then check
    a goal with
    `npx --package hermes-tiiny-router hermesrouter route-check "..."`, then

@@ -510,7 +510,9 @@ controller loads it and verifies the load before returning. Exceptions are
 silently caught so a load failure cannot break routing -- the device returns 404
 and Hermes falls back to the paid provider as expected.
 
-To disable, set the environment variable `TIINY_ENSURE_ON_ROUTE=false`.
+To disable, export `TIINY_ENSURE_ON_ROUTE=false` in the environment Hermes
+starts in. The backend reads it from the process environment only; a line
+in `~/.hermes/.env` has no effect.
 
 **One list, one file.** `REQUIRED_MODELS` in `scripts/tiiny_ctl.py` is the
 only copy, and the installed directory holds the only installed copy of the
