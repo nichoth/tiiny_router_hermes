@@ -77,6 +77,44 @@ Add the device's bearer token to `~/.hermes/.env` yourself.
 TIINY_API_KEY="..."
 ```
 
+## Quickstart
+
+### 1. Install
+
+```sh
+npm i -D hermes-tiiny-router
+```
+
+This installs the hermes-specific parts:
+
+```sh
+npx hermesrouter install
+```
+
+It writes these files, in `$HERMES_HOME` (default `~/.hermes`):
+
+* `~/.hermes/plugins/tiiny-router/` -- the plugin files are copied here,
+  along with an install manifest, `.hermes-tiiny-router-manifest.json`.
+  On upgrade, files the old version installed but the new one lacks are deleted,
+  unless you edited them.
+* Hermes config, only if you accept the config step
+  (it asks, or pass `--configure`). It runs `hermes config set` to
+  add the `tiiny` provider (`providers.tiiny.*`) and set
+  `delegation.backend: tiiny-router`, then `hermes plugins enable tiiny-router`.
+  Pass `--no-configure` to skip this.
+
+It also runs `hermes plugins validate` on the plugin directory, which
+changes nothing. It never reads or writes `~/.hermes/.env`.
+
+### 2. Configure
+
+Need the secret key in the env for Hermes. You can set it in `~/.hermes/.env`:
+
+```sh
+TIINY_API_KEY="..."
+```
+
+
 ## What is the Hermes harness?
 
 [Hermes Agent][hermes] is a harness from Nous Research. It provides the
